@@ -1,5 +1,7 @@
 import asyncio
+import json
 import os
+import time
 
 import cv2
 import pydicom
@@ -35,6 +37,7 @@ class ImageStreamTrack(VideoStreamTrack):
 
         if len(self.images) == 0:
             raise ValueError("No images found in folder")
+
 
     async def recv(self):
         pts, time_base = await self.next_timestamp()

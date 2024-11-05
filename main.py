@@ -31,11 +31,6 @@ async def offer(offer: Offer):
     pc.addTrack(image_track)
     print("Track added to peer connection")
 
-    # Function to send metadata
-    async def send_metadata():
-        metadata = {"image_id": image_track.current_index, "timestamp": time.time()}
-        await data_channel.send(json.dumps(metadata))
-
     # Set the remote description based on the offer
     rct_offer = RTCSessionDescription(sdp=offer.sdp, type=offer.type)
     await pc.setRemoteDescription(rct_offer)
