@@ -1,13 +1,20 @@
-import json
-import time
-
 from aiortc.contrib.media import MediaRelay
-from fastapi import FastAPI, WebSocket, WebSocketDisconnect
+from fastapi import FastAPI, WebSocket
+from fastapi.middleware.cors import CORSMiddleware
 from aiortc import RTCPeerConnection, RTCSessionDescription, RTCIceCandidate, RTCConfiguration, RTCIceServer
 from pydantic import BaseModel
-
 from models.ImageStreamTrack import ImageStreamTrack
+
 app = FastAPI()
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
 relay = MediaRelay()
 peer_connections = {}
 
@@ -44,3 +51,28 @@ async def offer(offer: Offer):
     # Return the answer
     return {"sdp": pc.localDescription.sdp, "type": pc.localDescription.type}
 
+
+app = FastAPI()
+clients = []
+
+@app.websocket("/ws/signaling")
+async def signaling_endpoint(websocket: WebSocket):
+    print("Client connected")
+    await websocket.accept()
+    clients.append(websocket)
+
+    print(f"Number of clients: {len(clients)}")
+
+    try:
+        while True:
+            data = await websocket.receive_text()
+            print(f"Received data: {data}")
+            # Broadcast the data to other clients
+            for client in clients:
+                if client != websocket:
+                    await client.send_text(data)
+                    print(f"Sent data to client")
+    except Exception as e:
+        print(f"Client disconnected: {e}")
+    finally:
+        clients.remove(websocket)
