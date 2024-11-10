@@ -1,23 +1,23 @@
 import asyncio
-import json
 import os
-import time
-
 import cv2
 import pydicom
 from aiortc import VideoStreamTrack
 import numpy as np
 from av import VideoFrame
-
+from routes.images import UPLOAD_FOLDER
 
 class ImageStreamTrack(VideoStreamTrack):
-    def __init__(self):
+    def __init__(self, imageProcessor, image_delay):
         super().__init__()
         self.images = []
         self.current_index = 0
-        self.frame_rate = 1
+        self.image_delay = image_delay
+        self.processed_images = []
+        self.image_processor = imageProcessor
+        self._stopped = False
 
-        self.load_images("images")
+        self.load_images(UPLOAD_FOLDER)
 
     def load_images(self, folder):
         # Reset the images list
@@ -32,27 +32,36 @@ class ImageStreamTrack(VideoStreamTrack):
                 image = dicom_data.pixel_array.astype(np.float32)
                 image = cv2.normalize(image, None, 0, 255, cv2.NORM_MINMAX)
                 image = image.astype(np.uint8)
-                image = cv2.cvtColor(image, cv2.COLOR_GRAY2RGB)
                 self.images.append(image)
 
         if len(self.images) == 0:
             raise ValueError("No images found in folder")
 
-
     async def recv(self):
+        if self._stopped:
+            return
+
         pts, time_base = await self.next_timestamp()
+        if len(self.processed_images) < len(self.images):
+            # Get the current image
+            current_image = self.images[self.current_index]
+            # Segment the image
+            segmented_image = self.image_processor.segment_image(current_image)
+            self.processed_images.append(segmented_image)
+        else:
+            segmented_image = self.processed_images[self.current_index]
 
-        # Get the current image
-        current_image = self.images[self.current_index]
-
-        video_frame = VideoFrame.from_ndarray(current_image, format="bgr24")
+        video_frame = VideoFrame.from_ndarray(segmented_image, format="bgr24")
         video_frame.pts = pts
         video_frame.time_base = time_base
 
         # Move to the next image
         self.current_index = (self.current_index + 1) % len(self.images)
 
-        # Adjust delay based on frame rate
-        await asyncio.sleep(5)
+        # Adjust delay based on image delay
+        await asyncio.sleep(self.image_delay)
 
         return video_frame
+
+    async def stop(self):
+        self._stopped = True
