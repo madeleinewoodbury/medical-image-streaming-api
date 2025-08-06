@@ -2,6 +2,32 @@
 
 A FastAPI-based backend service for streaming and processing medical DICOM images in real-time using WebRTC technology. This API provides advanced image segmentation capabilities using computer vision algorithms including Watershed and Active Contours (Snakes) methods.
 
+## Table of Contents
+
+- [Frontend Application](#frontend-application)
+- [Features](#features)
+- [Technology Stack](#technology-stack)
+- [Prerequisites](#prerequisites)
+- [Installation](#installation)
+- [Usage](#usage)
+  - [Starting the Server](#starting-the-server)
+  - [API Documentation](#api-documentation)
+- [API Endpoints](#api-endpoints)
+  - [Health Check](#health-check)
+  - [Image Management](#image-management)
+  - [Image Processing & Streaming](#image-processing--streaming)
+  - [Stream Management](#stream-management)
+- [Image Processing Algorithms](#image-processing-algorithms)
+  - [Watershed Segmentation](#watershed-segmentation)
+  - [Active Contours (Snakes)](#active-contours-snakes)
+- [Project Structure](#project-structure)
+- [Development](#development)
+  - [Running in Development Mode](#running-in-development-mode)
+  - [Adding New Segmentation Algorithms](#adding-new-segmentation-algorithms)
+- [Contributing](#contributing)
+- [License](#license)
+- [Related Projects](#related-projects)
+
 ## Frontend Application
 
 The frontend implementation is available in a separate repository: [Medical Image Streaming App](https://github.com/madeleinewoodbury/medical-image-streaming-app)
