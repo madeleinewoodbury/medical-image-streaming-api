@@ -21,7 +21,7 @@ app.include_router(images.router)
 # Test route
 @app.get("/")
 async def root():
-    return {"message": "Hello World"}
+    return {"message": "API is running"}
 
 relay = MediaRelay()
 peer_connections = {}
@@ -96,8 +96,6 @@ async def offer(
         radius: int = 50,
         image_delay: int = 1
 ):
-
-    print("Snakes offer received")
 
     # Initialize the image processor for snakes
     image_processor = SnakesProcessor(kernel_size, x, y, radius)
